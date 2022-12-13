@@ -9,7 +9,7 @@ template<class T>
 class safe_ptr
 {
 private:
-	T* m_Var;
+	T* m_Var = nullptr;
 
 public:
 	safe_ptr()
@@ -35,6 +35,12 @@ public:
 		: m_Var(new T(s_ptr.cget()))
 	{
 
+	}
+
+	template <class... Args>
+	safe_ptr(Args&&... args)
+	{
+		m_Var = new T(args...);
 	}
 
 	~safe_ptr()
@@ -125,7 +131,7 @@ public:
 
 	operator bool() const
 	{
-		return (bool)*this->m_Var;
+		return this->m_Var != nullptr;
 	}
 };
 
