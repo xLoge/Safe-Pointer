@@ -10,7 +10,7 @@ class safe_ptr
 {
 private:
 	T* m_Var;
-	
+
 public:
 	safe_ptr()
 		:m_Var(new T)
@@ -21,14 +21,14 @@ public:
 	safe_ptr(T* ptr, bool reuse)
 		: m_Var(ptr)
 	{
-		if (reuse)
+		if (!reuse)
 			*this->m_Var = *ptr;
 	}
 
 	safe_ptr(const T var)
 		: m_Var(new T(var))
 	{
-		
+
 	}
 
 	safe_ptr(const safe_ptr<T>& s_ptr)
@@ -84,7 +84,8 @@ public:
 
 	void operator=(T* ptr)
 	{
-		*this->m_Var = *ptr;
+		delete this->m_Var;
+		this->m_Var = ptr;
 	}
 
 	T operator*() const
