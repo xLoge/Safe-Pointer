@@ -4,7 +4,6 @@ Like std::unique_ptr but simpler
 Example:
 
 ```
-#incl
 #include <iostream>
 #include "safe_ptr.h"
 
