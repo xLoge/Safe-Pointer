@@ -1,4 +1,5 @@
 #include <ostream>
+#include <memory>
 
 #pragma once
 
@@ -13,7 +14,6 @@ private:
 
 public:
 	safe_ptr()
-		:m_Var(new T)
 	{
 
 	}
@@ -25,34 +25,42 @@ public:
 			*this->m_Var = *ptr;
 	}
 
-	safe_ptr(const T var)
+	safe_ptr(T var)
 		: m_Var(new T(var))
 	{
 
 	}
 
-	safe_ptr(const safe_ptr<T>& s_ptr)
+	safe_ptr(safe_ptr<T>& s_ptr)
 		: m_Var(new T(s_ptr.cget()))
 	{
 
 	}
 
+	safe_ptr(std::unique_ptr<T>& ptr)
+	{
+		if (ptr.get() != nullptr)
+			this->m_Var = new T(*ptr.get());
+	}
+
+	safe_ptr(std::shared_ptr<T>& ptr)
+	{
+		if (ptr.get() != nullptr)
+			this->m_Var = new T(*ptr.get());
+	}
+
 	template <class... Args>
 	safe_ptr(Args&&... args)
+		:m_Var(new T(args...))
 	{
-		m_Var = new T(args...);
+
 	}
 
 	~safe_ptr()
 	{
-		if (m_Var) {
+		if (m_Var != nullptr) {
 			delete m_Var;
 		}
-	}
-
-	T* get()
-	{
-		return this->m_Var;
 	}
 
 	void swap(safe_ptr<T>& other)
@@ -65,10 +73,15 @@ public:
 	void reset()
 	{
 		delete this->m_Var;
-		m_Var = new T;
+		m_Var = new T(0);
 	}
 
-	T cget() const
+	T* get()
+	{
+		return this->m_Var;
+	}
+
+	const T cget() const
 	{
 		return *this->m_Var;
 	}
@@ -92,6 +105,21 @@ public:
 	{
 		delete this->m_Var;
 		this->m_Var = ptr;
+	}
+
+	void operator=(safe_ptr<T>& save_ptr)
+	{
+		*this->m_Var = *save_ptr.get();
+	}
+
+	void operator=(std::unique_ptr<T>& ptr)
+	{
+		*this->m_Var = *ptr.get();
+	}
+
+	void operator=(std::shared_ptr<T>& ptr)
+	{
+		*this->m_Var = *ptr.get();
 	}
 
 	T operator*() const
@@ -138,7 +166,7 @@ public:
 template<class T>
 std::ostream& operator<<(std::ostream& out, const safe_ptr<T>& ptr)
 {
-	return out << ptr.cget();
+	return out << ptr.get();
 }
 
 #endif
