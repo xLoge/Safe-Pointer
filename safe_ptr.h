@@ -28,19 +28,19 @@ public:
 		}
 	}
 
-	safe_ptr(const safe_ptr<T>& ptr)
+	safe_ptr(safe_ptr<T>& ptr)
 		: m_Var(new T(ptr.cget()))
 	{
 
 	}
 
-	safe_ptr(const std::unique_ptr<T>& ptr)
+	safe_ptr(std::unique_ptr<T> ptr)
 		: m_Var(new T(*ptr.get()))
 	{
 
 	}
 
-	safe_ptr(const std::shared_ptr<T>& ptr)
+	safe_ptr(std::shared_ptr<T> ptr)
 		: m_Var(new T(*ptr.get()))
 	{
 
