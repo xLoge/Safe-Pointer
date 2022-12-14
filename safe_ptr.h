@@ -14,7 +14,7 @@ private:
 
 public:
 	safe_ptr()
-		: m_Var(new T(0))
+		: m_Var(new T{ })
 	{
 
 	}
