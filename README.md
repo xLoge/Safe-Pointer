@@ -1,5 +1,5 @@
 # Safe-Pointer
-Like std::unique_ptr but simpler
+Idk a like Smart Pointer
 
 Example:
 
