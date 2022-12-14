@@ -10,40 +10,37 @@ template<class T>
 class safe_ptr
 {
 private:
-	T* m_Var = nullptr;
+	T* m_Var; // The holy pointer
 
 public:
 	safe_ptr()
+		: m_Var(new T(0))
 	{
 
 	}
 
-	safe_ptr(T* ptr, bool reuse)
+	safe_ptr(T* ptr, const bool use = false)
 		: m_Var(ptr)
 	{
-		if (!reuse)
-			*this->m_Var = *ptr;
+		if (!std::move(use))
+		{
+			this->m_Var = new T(*ptr);
+		}
 	}
 
-	safe_ptr(T var)
-		: m_Var(new T(var))
-	{
-
-	}
-
-	safe_ptr(safe_ptr<T>& s_ptr)
+	safe_ptr(const safe_ptr<T>& s_ptr)
 		: m_Var(new T(s_ptr.cget()))
 	{
 
 	}
 
-	safe_ptr(std::unique_ptr<T>& ptr)
+	safe_ptr(const std::unique_ptr<T>& ptr)
 	{
 		if (ptr.get() != nullptr)
 			this->m_Var = new T(*ptr.get());
 	}
 
-	safe_ptr(std::shared_ptr<T>& ptr)
+	safe_ptr(const std::shared_ptr<T>& ptr)
 	{
 		if (ptr.get() != nullptr)
 			this->m_Var = new T(*ptr.get());
@@ -51,7 +48,7 @@ public:
 
 	template <class... Args>
 	safe_ptr(Args&&... args)
-		:m_Var(new T(args...))
+		: m_Var(new T(args...))
 	{
 
 	}
@@ -59,21 +56,24 @@ public:
 	~safe_ptr()
 	{
 		if (m_Var != nullptr) {
-			delete m_Var;
+			delete this->m_Var;
 		}
 	}
 
-	void swap(safe_ptr<T>& other)
+	void swap(safe_ptr<T>& right)
 	{
-		const T new_val = other.cget();
-		other = *this->m_Var;
-		*this->m_Var = new_val;
+		std::swap(*this->m_Var, *right.m_Var);
+	}
+
+	void swap_ptr(safe_ptr<T>& right)
+	{
+		std::swap(this->m_Var, right.m_Var);
 	}
 
 	void reset()
 	{
 		delete this->m_Var;
-		m_Var = new T(0);
+		this->m_Var = new T(0);
 	}
 
 	T* get()
@@ -98,7 +98,7 @@ public:
 
 	void operator=(T val)
 	{
-		*this->m_Var = val;
+		*this->m_Var = std::move(val);
 	}
 
 	void operator=(T* ptr)
@@ -107,19 +107,22 @@ public:
 		this->m_Var = ptr;
 	}
 
-	void operator=(safe_ptr<T>& save_ptr)
+	void operator=(safe_ptr<T>& ptr)
 	{
-		*this->m_Var = *save_ptr.get();
+		if (ptr.m_Var != nullptr)
+			*this->m_Var = ptr.get();
 	}
 
 	void operator=(std::unique_ptr<T>& ptr)
 	{
-		*this->m_Var = *ptr.get();
+		if (ptr.get() != nullptr)
+			*this->m_Var = *ptr.get();
 	}
 
 	void operator=(std::shared_ptr<T>& ptr)
 	{
-		*this->m_Var = *ptr.get();
+		if (ptr.get() != nullptr)
+			*this->m_Var = *ptr.get();
 	}
 
 	T operator*() const
@@ -132,14 +135,14 @@ public:
 		return *this->m_Var;
 	}
 
-	T operator[](size_t idx) const
+	T operator[](const size_t idx) const
 	{
-		return *this->m_Var[idx];
+		return *this->m_Var[std::move(idx)];
 	}
 
 	bool operator==(const T val) const
 	{
-		return *this->m_Var == val;
+		return *this->m_Var == std::move(val);
 	}
 
 	bool operator==(const safe_ptr<T>& val) const
@@ -149,7 +152,7 @@ public:
 
 	bool operator!=(const T val) const
 	{
-		return *this->m_Var != val;
+		return *this->m_Var != std::move(val);
 	}
 
 	bool operator!=(const safe_ptr<T>& val) const
@@ -164,7 +167,7 @@ public:
 };
 
 template<class T>
-std::ostream& operator<<(std::ostream& out, const safe_ptr<T>& ptr)
+std::ostream& operator<<(std::ostream& out, safe_ptr<T>& ptr)
 {
 	return out << ptr.get();
 }
