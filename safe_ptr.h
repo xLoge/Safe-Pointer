@@ -19,7 +19,7 @@ public:
 
 	}
 
-	safe_ptr(T* ptr, const bool use = false)
+	safe_ptr(T* ptr, const bool use = true)
 		: m_Var(ptr)
 	{
 		if (!std::move(use))
@@ -28,22 +28,22 @@ public:
 		}
 	}
 
-	safe_ptr(const safe_ptr<T>& s_ptr)
-		: m_Var(new T(s_ptr.cget()))
+	safe_ptr(const safe_ptr<T>& ptr)
+		: m_Var(new T(ptr.cget()))
 	{
 
 	}
 
 	safe_ptr(const std::unique_ptr<T>& ptr)
+		: m_Var(new T(*ptr.get()))
 	{
-		if (ptr.get() != nullptr)
-			this->m_Var = new T(*ptr.get());
+
 	}
 
 	safe_ptr(const std::shared_ptr<T>& ptr)
+		: m_Var(new T(*ptr.get()))
 	{
-		if (ptr.get() != nullptr)
-			this->m_Var = new T(*ptr.get());
+
 	}
 
 	template <class... Args>
@@ -55,9 +55,7 @@ public:
 
 	~safe_ptr()
 	{
-		if (m_Var != nullptr) {
-			delete this->m_Var;
-		}
+		if (this->m_Var) { delete this->m_Var; this->m_Var = nullptr; }
 	}
 
 	void swap(safe_ptr<T>& right)
@@ -72,8 +70,13 @@ public:
 
 	void reset()
 	{
-		delete this->m_Var;
+		if (this->m_Var) { delete this->m_Var; }
 		this->m_Var = new T(0);
+	}
+
+	void destroy()
+	{
+		if (this->m_Var) { delete this->m_Var; this->m_Var = nullptr; }
 	}
 
 	T* get()
@@ -81,7 +84,7 @@ public:
 		return this->m_Var;
 	}
 
-	const T cget() const
+	T cget() const
 	{
 		return *this->m_Var;
 	}
@@ -94,35 +97,6 @@ public:
 	T* operator()()
 	{
 		return this->m_Var;
-	}
-
-	void operator=(T val)
-	{
-		*this->m_Var = std::move(val);
-	}
-
-	void operator=(T* ptr)
-	{
-		delete this->m_Var;
-		this->m_Var = ptr;
-	}
-
-	void operator=(safe_ptr<T>& ptr)
-	{
-		if (ptr.m_Var != nullptr)
-			*this->m_Var = ptr.get();
-	}
-
-	void operator=(std::unique_ptr<T>& ptr)
-	{
-		if (ptr.get() != nullptr)
-			*this->m_Var = *ptr.get();
-	}
-
-	void operator=(std::shared_ptr<T>& ptr)
-	{
-		if (ptr.get() != nullptr)
-			*this->m_Var = *ptr.get();
 	}
 
 	T operator*() const
@@ -138,6 +112,32 @@ public:
 	T operator[](const size_t idx) const
 	{
 		return *this->m_Var[std::move(idx)];
+	}
+
+	void operator=(T val)
+	{
+		*this->m_Var = std::move(val);
+	}
+
+	void operator=(T* ptr)
+	{
+		delete this->m_Var;
+		this->m_Var = ptr;
+	}
+
+	void operator=(safe_ptr<T>& ptr)
+	{
+		*this->m_Var = *ptr.get();
+	}
+
+	void operator=(std::unique_ptr<T>& ptr)
+	{
+		*this->m_Var = *ptr.get();
+	}
+
+	void operator=(std::shared_ptr<T>& ptr)
+	{
+		*this->m_Var = *ptr.get();
 	}
 
 	bool operator==(const T val) const
