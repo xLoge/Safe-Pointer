@@ -71,7 +71,7 @@ public:
 		if (this->m_Ptr && m_IsOwnerClass)
 		{ 
 			delete this->m_Ptr;
-			this->m_Ptr		= nullptr;
+			this->m_Ptr = nullptr;
 		}
 	}
 
