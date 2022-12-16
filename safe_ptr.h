@@ -25,6 +25,12 @@ public:
 	{
 
 	}
+	
+	constexpr safe_ptr(T* ptr)
+		: m_Ptr(ptr)
+	{
+
+	}
 
 	explicit constexpr safe_ptr(T* ptr, bool copy_val = false)
 		: m_Ptr(ptr)
