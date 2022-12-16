@@ -25,7 +25,7 @@ int main()
 		// Example 2
 		{
 			int* oh_no = new int(1337);
-			safe_ptr<int> safe = oh_no; // (int* ptr, bool copy_val) We can assign the 'oh_no' pointer to the safe_ptr
+			safe_ptr<int> safe = oh_no;
 			std::cout << "\n" << *oh_no;
 		} // 'oh_no' gets deleted
 
