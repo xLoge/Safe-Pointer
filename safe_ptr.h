@@ -10,164 +10,180 @@ template<class T>
 class safe_ptr
 {
 private:
-	T* m_Var; // The holy pointer
+	T* m_Ptr; // The holy pointer
+	const bool m_IsOwnerClass = true;
 
 public:
-	safe_ptr()
-		: m_Var(new T{ })
+	constexpr safe_ptr()
+		: m_Ptr(new T{ })
+	{
+
+	}
+	
+	constexpr safe_ptr(T val)
+		: m_Ptr(new T(val))
 	{
 
 	}
 
-	safe_ptr(T* ptr, const bool use = true)
-		: m_Var(ptr)
+	explicit constexpr safe_ptr(T* ptr, bool copy_val = false)
+		: m_Ptr(ptr)
 	{
-		if (!std::move(use))
+		if (std::move(copy_val))
 		{
-			this->m_Var = new T(*ptr);
+			this->m_Ptr = new T(*ptr);
 		}
 	}
 
-	safe_ptr(safe_ptr<T>& ptr)
-		: m_Var(new T(ptr.cget()))
+	constexpr safe_ptr(std::unique_ptr<T> ptr)
+		: m_Ptr(ptr.get()), m_IsOwnerClass(false)
 	{
 
 	}
 
-	safe_ptr(std::unique_ptr<T> ptr)
-		: m_Var(new T(*ptr.get()))
+	constexpr safe_ptr(std::shared_ptr<T> ptr)
+		: m_Ptr(ptr.get()), m_IsOwnerClass(false)
 	{
 
 	}
 
-	safe_ptr(std::shared_ptr<T> ptr)
-		: m_Var(new T(*ptr.get()))
+	constexpr safe_ptr(safe_ptr<T>& ptr)
+		: m_Ptr(ptr.get()), m_IsOwnerClass(false)
 	{
-
+		
 	}
 
 	template <class... Args>
-	safe_ptr(Args&&... args)
-		: m_Var(new T(args...))
+	explicit constexpr safe_ptr(Args&&... args)
+		: m_Ptr(new T(args...))
 	{
 
 	}
 
-	~safe_ptr()
+	constexpr ~safe_ptr()
 	{
-		if (this->m_Var) { delete this->m_Var; this->m_Var = nullptr; }
+		if (this->m_Ptr && m_IsOwnerClass)
+		{ 
+			delete this->m_Ptr;
+			this->m_Ptr		= nullptr;
+		}
 	}
 
-	void swap(safe_ptr<T>& right)
+	constexpr void swap(safe_ptr<T>& right)
 	{
-		std::swap(*this->m_Var, *right.m_Var);
+		std::swap(*this->m_Ptr, *right.m_Ptr);
 	}
 
-	void swap_ptr(safe_ptr<T>& right)
+	constexpr void swap_ptr(safe_ptr<T>& right)
 	{
-		std::swap(this->m_Var, right.m_Var);
+		std::swap(this->m_Ptr, right.m_Ptr);
 	}
 
-	void reset()
+	constexpr void reset()
 	{
-		if (this->m_Var) { delete this->m_Var; }
-		this->m_Var = new T(0);
+		if (this->m_Ptr) { 
+			delete this->m_Ptr;
+		}
+		this->m_Ptr = new T{ };
 	}
 
-	void destroy()
+	constexpr void destroy()
 	{
-		if (this->m_Var) { delete this->m_Var; this->m_Var = nullptr; }
+		if (this->m_Ptr) { 
+			delete this->m_Ptr;
+			this->m_Ptr = nullptr;
+		}
 	}
 
-	T* get()
+	constexpr T* get()
 	{
-		return this->m_Var;
+		return this->m_Ptr;
 	}
 
-	T cget() const
+	constexpr T cget() const
 	{
-		return *this->m_Var;
+		return *this->m_Ptr;
 	}
 
-	T* operator->()
+	constexpr T* operator->()
 	{
-		return this->m_Var;
+		return this->m_Ptr;
 	}
 
-	T* operator()()
+	constexpr T* operator()()
 	{
-		return this->m_Var;
+		return this->m_Ptr;
 	}
 
-	T operator*() const
+	constexpr T operator*() const
 	{
-		return *this->m_Var;
+		return *this->m_Ptr;
 	}
 
-	T operator()() const
+	constexpr T operator()() const
 	{
-		return *this->m_Var;
+		return *this->m_Ptr;
 	}
 
-	T operator[](const size_t idx) const
+	constexpr T operator[](size_t idx) const
 	{
-		return *this->m_Var[std::move(idx)];
+		return *this->m_Ptr[std::move(idx)];
 	}
 
-	void operator=(T val)
+	constexpr void operator=(T val)
 	{
-		*this->m_Var = std::move(val);
+		*this->m_Ptr = std::move(val);
 	}
 
-	void operator=(T* ptr)
+	constexpr void operator=(T* ptr)
 	{
-		delete this->m_Var;
-		this->m_Var = ptr;
+		delete this->m_Ptr;
+		this->m_Ptr = ptr;
 	}
 
-	void operator=(safe_ptr<T>& ptr)
+	constexpr void operator=(safe_ptr<T>& ptr)
 	{
-		*this->m_Var = *ptr.get();
+		*this->m_Ptr = *ptr.get();
 	}
 
-	void operator=(std::unique_ptr<T>& ptr)
+	constexpr void operator=(std::unique_ptr<T>& ptr)
 	{
-		*this->m_Var = *ptr.get();
+		*this->m_Ptr = *ptr.get();
 	}
 
-	void operator=(std::shared_ptr<T>& ptr)
+	constexpr void operator=(std::shared_ptr<T>& ptr)
 	{
-		*this->m_Var = *ptr.get();
+		*this->m_Ptr = *ptr.get();
 	}
 
-	bool operator==(const T val) const
+	constexpr bool operator==(const T val) const
 	{
-		return *this->m_Var == std::move(val);
+		return *this->m_Ptr == std::move(val);
 	}
 
-	bool operator==(const safe_ptr<T>& val) const
+	constexpr bool operator==(const safe_ptr<T>& val) const
 	{
-		return *this->m_Var == *val.m_Var;
+		return *this->m_Ptr == *val.m_Ptr;
 	}
 
-	bool operator!=(const T val) const
+	constexpr bool operator!=(const T val) const
 	{
-		return *this->m_Var != std::move(val);
+		return *this->m_Ptr != std::move(val);
 	}
 
-	bool operator!=(const safe_ptr<T>& val) const
+	constexpr bool operator!=(const safe_ptr<T>& val) const
 	{
-		return *this->m_Var != *val.m_Var;
+		return *this->m_Ptr != *val.m_Ptr;
 	}
 
-	operator bool() const
+	constexpr operator bool() const
 	{
-		return this->m_Var != nullptr;
+		return this->m_Ptr != nullptr;
 	}
 };
 
 template<class T>
-std::ostream& operator<<(std::ostream& out, safe_ptr<T>& ptr)
+constexpr std::ostream& operator<<(std::ostream& out, safe_ptr<T>& ptr)
 {
 	return out << ptr.get();
 }
