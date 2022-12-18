@@ -10,14 +10,15 @@ template<class T>
 class safe_ptr
 {
 private:
-	T* m_Ptr; // The holy pointer
-	const bool m_IsOwnerClass = true;
+	T* m_Ptr;
+	bool m_IsChildClass = false;
+	bool* m_Deleted = &m_IsChildClass;
 
 public:
 	constexpr safe_ptr()
 		: m_Ptr(new T{ })
 	{
-
+		
 	}
 	
 	constexpr safe_ptr(T val)
@@ -25,7 +26,7 @@ public:
 	{
 
 	}
-	
+
 	constexpr safe_ptr(T* ptr)
 		: m_Ptr(ptr)
 	{
@@ -42,19 +43,19 @@ public:
 	}
 
 	constexpr safe_ptr(std::unique_ptr<T> ptr)
-		: m_Ptr(ptr.get()), m_IsOwnerClass(false)
+		: m_Ptr(ptr.get()), m_IsChildClass(true)
 	{
 
 	}
 
 	constexpr safe_ptr(std::shared_ptr<T> ptr)
-		: m_Ptr(ptr.get()), m_IsOwnerClass(false)
+		: m_Ptr(ptr.get()), m_IsChildClass(true)
 	{
 
 	}
 
 	constexpr safe_ptr(safe_ptr<T>& ptr)
-		: m_Ptr(ptr.get()), m_IsOwnerClass(false)
+		: m_Ptr(ptr.get()), m_IsChildClass(true), m_Deleted(&ptr.m_IsChildClass)
 	{
 		
 	}
@@ -68,10 +69,9 @@ public:
 
 	constexpr ~safe_ptr()
 	{
-		if (this->m_Ptr && m_IsOwnerClass)
+		if (this->m_Ptr != nullptr && this->m_IsChildClass == false)
 		{ 
 			delete this->m_Ptr;
-			this->m_Ptr = nullptr;
 		}
 	}
 
@@ -87,17 +87,18 @@ public:
 
 	constexpr void reset()
 	{
-		if (this->m_Ptr) { 
+		if (this->m_Ptr != nullptr) {
 			delete this->m_Ptr;
 		}
 		this->m_Ptr = new T{ };
+		*this->m_Deleted = false;
 	}
 
 	constexpr void destroy()
 	{
-		if (this->m_Ptr) { 
+		if (this->m_Ptr != nullptr) {
 			delete this->m_Ptr;
-			this->m_Ptr = nullptr;
+			*this->m_Deleted = true;
 		}
 	}
 
@@ -141,6 +142,11 @@ public:
 		*this->m_Ptr = std::move(val);
 	}
 
+	constexpr void operator=(const T& val)
+	{
+		*this->m_Ptr = val;
+	}
+
 	constexpr void operator=(T* ptr)
 	{
 		delete this->m_Ptr;
@@ -162,9 +168,14 @@ public:
 		*this->m_Ptr = *ptr.get();
 	}
 
-	constexpr bool operator==(const T val) const
+	constexpr bool operator==(T val) const
 	{
 		return *this->m_Ptr == std::move(val);
+	}
+
+	constexpr bool operator==(const T& val) const
+	{
+		return *this->m_Ptr == val;
 	}
 
 	constexpr bool operator==(const safe_ptr<T>& val) const
@@ -172,9 +183,14 @@ public:
 		return *this->m_Ptr == *val.m_Ptr;
 	}
 
-	constexpr bool operator!=(const T val) const
+	constexpr bool operator!=(T val) const
 	{
 		return *this->m_Ptr != std::move(val);
+	}
+
+	constexpr bool operator!=(const T& val) const
+	{
+		return *this->m_Ptr != val;
 	}
 
 	constexpr bool operator!=(const safe_ptr<T>& val) const
