@@ -12,7 +12,6 @@ class safe_ptr
 private:
 	T* m_Ptr;
 	bool m_IsChildClass = false;
-	bool* m_Deleted = &m_IsChildClass;
 
 public:
 	constexpr safe_ptr()
@@ -55,7 +54,7 @@ public:
 	}
 
 	constexpr safe_ptr(safe_ptr<T>& ptr)
-		: m_Ptr(ptr.get()), m_IsChildClass(true), m_Deleted(&ptr.m_IsChildClass)
+		: m_Ptr(ptr.get()), m_IsChildClass(true)
 	{
 		
 	}
@@ -91,14 +90,12 @@ public:
 			delete this->m_Ptr;
 		}
 		this->m_Ptr = new T{ };
-		*this->m_Deleted = false;
 	}
 
 	constexpr void destroy()
 	{
 		if (this->m_Ptr != nullptr) {
 			delete this->m_Ptr;
-			*this->m_Deleted = true;
 		}
 	}
 
