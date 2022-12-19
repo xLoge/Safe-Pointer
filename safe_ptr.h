@@ -20,8 +20,8 @@ public:
 		
 	}
 	
-	constexpr safe_ptr(T val)
-		: m_Ptr(new T(val))
+	constexpr safe_ptr(T&& val)
+		: m_Ptr(new T(std::move(val)))
 	{
 
 	}
@@ -61,7 +61,7 @@ public:
 
 	template <class... Args>
 	explicit constexpr safe_ptr(Args&&... args)
-		: m_Ptr(new T(args...))
+		: m_Ptr(new T(std::move(args...)))
 	{
 
 	}
@@ -99,7 +99,7 @@ public:
 		}
 	}
 
-	constexpr T* get()
+	constexpr T* get() const
 	{
 		return this->m_Ptr;
 	}
@@ -129,14 +129,14 @@ public:
 		return *this->m_Ptr;
 	}
 
-	constexpr T operator[](size_t idx) const
+	constexpr T& operator[](size_t idx) const
 	{
-		return *this->m_Ptr[std::move(idx)];
+		return this->m_Ptr[idx];
 	}
 
 	constexpr void operator=(T val)
 	{
-		*this->m_Ptr = std::move(val);
+		*this->m_Ptr = val;
 	}
 
 	constexpr void operator=(const T& val)
@@ -167,7 +167,7 @@ public:
 
 	constexpr bool operator==(T val) const
 	{
-		return *this->m_Ptr == std::move(val);
+		return *this->m_Ptr == val;
 	}
 
 	constexpr bool operator==(const T& val) const
