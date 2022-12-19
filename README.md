@@ -1,5 +1,5 @@
 # Safe-Pointer
-Idk a like Smart Pointer
+A Smart Pointer Class just for me
 
 Example:
 
