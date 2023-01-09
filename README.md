@@ -25,7 +25,7 @@ int main()
 	{
 		int* oh_no = new int(1337);
 		fst::safe_ptr<int> safe = oh_no;
-		std::cout << *oh_no << std::endl;
+		std::cout << *safe << std::endl;
 	}
 
 	// Example 3
