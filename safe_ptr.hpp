@@ -75,6 +75,13 @@ namespace fst
 			}
 		}
 
+		constexpr void init()
+		{
+			if (!m_Ptr) {
+				m_Ptr = new T{ };
+			}
+		}
+
 		constexpr void swap(safe_ptr<T>& right)
 		{
 			std::swap(*this->m_Ptr, *right.m_Ptr);
