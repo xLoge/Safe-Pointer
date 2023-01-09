@@ -5,7 +5,7 @@ Example:
 
 ```
 #include <iostream>
-#include "safe_ptr.h"
+#include "safe_ptr.hpp"
 
 struct Example
 {
