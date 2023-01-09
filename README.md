@@ -18,20 +18,20 @@ int main()
 	{
 		// Example 1
 		{
-			safe_ptr<Example> Ex;
+			fst::safe_ptr<Example> Ex;
 			std::cout << Ex->x << " " << Ex->y;
 		}
 
 		// Example 2
 		{
 			int* oh_no = new int(1337);
-			safe_ptr<int> safe = oh_no;
+			fst::safe_ptr<int> safe = oh_no;
 			std::cout << "\n" << *oh_no;
 		} // 'oh_no' gets deleted
 
 		// Example 3
 		{
-			safe_ptr<size_t> num = 123456789;
+			fst::safe_ptr<size_t> num = 123456789;
 			std::cout << "\n" << num;
 		}
 	}
