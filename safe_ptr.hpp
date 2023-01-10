@@ -415,4 +415,10 @@ constexpr std::ostream& operator<<(std::ostream& out, fst::safe_ptr<T>& ptr)
 	return out << ptr.get();
 }
 
+template<class T>
+constexpr std::ostream& operator<<(std::ostream& out, fst::safe_ptr<T[]>& ptr)
+{
+	return out << ptr.get();
+}
+
 #endif
