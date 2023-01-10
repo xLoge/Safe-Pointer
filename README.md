@@ -39,5 +39,11 @@ int main()
 		fst::safe_ptr<long long> num = new long long(54321);
 		std::cout << *num << std::endl;
 	}
+	
+	// Example 5
+	{
+		fst::safe_ptr<Example[]> num = new Example[10];
+		std::cout << num[0].x << std::endl;
+	}
 }
 ```
